@@ -1,4 +1,4 @@
-import { getAllProspects } from '@/lib/db/repository';
+import { getAllProspects, type ProspectRow } from '@/lib/db/repository';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,8 +8,21 @@ function badge(qualified: boolean) {
     : 'bg-slate-800 text-slate-400';
 }
 
+/**
+ * Read prospects, but tolerate environments with no writable database
+ * (e.g. serverless hosting like Vercel, where the local SQLite file can't
+ * be created). In that case we render the empty state instead of crashing.
+ */
+function loadProspects(): ProspectRow[] {
+  try {
+    return getAllProspects();
+  } catch {
+    return [];
+  }
+}
+
 export default function HomePage() {
-  const prospects = getAllProspects();
+  const prospects = loadProspects();
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
